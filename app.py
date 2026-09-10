@@ -2,7 +2,7 @@
 import streamlit as st
 from google import genai
 
-# Gemini client — API key Streamlit Secrets se lega
+# Gemini client - API key Streamlit Secrets se
 client = genai.Client(
     api_key=st.secrets["GEMINI_API_KEY"]
 )
@@ -12,14 +12,14 @@ st.set_page_config(
     page_icon="🤖"
 )
 
-st.title("🤖 Evil GPT")
+st.title("💀 Evil GPT")
 st.caption("Smart AI Assistant")
 
 # Chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Purani messages dikhao
+# Purane messages dikhao
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -47,7 +47,7 @@ Conversation:
 """
 
     for msg in st.session_state.messages:
-        conversation += f"\n{msg['role']}: {msg['content']}"
+        conversation += f'\n{msg["role"]}: {msg["content"]}'
 
     with st.chat_message("assistant"):
         try:
@@ -65,4 +65,4 @@ Conversation:
             })
 
         except Exception as e:
-            st.error("AI se connection nahi ho pa raha. Streamlit Secrets me GEMINI_API_KEY check karo.")
+            st.exception(e)
