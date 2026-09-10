@@ -2,7 +2,6 @@ import streamlit as st
 import time
 from google import genai
 
-# Gemini client - API key Streamlit Secrets se
 client = genai.Client(
     api_key=st.secrets["GEMINI_API_KEY"]
 )
@@ -14,50 +13,122 @@ st.set_page_config(
 )
 
 # =========================
-# DARK VILLAIN DESIGN
+# DARK VILLAIN THEME
 # =========================
 st.markdown("""
 <style>
+
+/* Main background */
 .stApp {
-    background: #050505;
-    color: #eeeeee;
+    background: #030405 !important;
 }
 
+/* Title */
 h1 {
     color: #ff2020 !important;
     text-align: center;
-    text-shadow: 0 0 15px #ff0000;
+    text-shadow: 0 0 18px #ff0000;
 }
 
-.villain-box {
-    background: #090909;
+/* Caption */
+.stCaption {
+    color: #00eaff !important;
+}
+
+/* Normal text */
+.stMarkdown p,
+.stMarkdown li,
+.stMarkdown strong {
+    color: #eeeeee;
+}
+
+/* =========================
+   USER MESSAGE - CYAN
+   ========================= */
+
+div[data-testid="stChatMessage"]:has(
+    div[data-testid="chatAvatarIcon-user"]
+) {
+    background: rgba(0, 220, 255, 0.08);
+    border: 1px solid #00eaff;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(0, 234, 255, 0.20);
+}
+
+div[data-testid="stChatMessage"]:has(
+    div[data-testid="chatAvatarIcon-user"]
+) p {
+    color: #00eaff !important;
+}
+
+/* =========================
+   EVIL GPT MESSAGE - RED
+   ========================= */
+
+div[data-testid="stChatMessage"]:has(
+    div[data-testid="chatAvatarIcon-assistant"]
+) {
+    background: rgba(255, 0, 0, 0.06);
     border: 1px solid #ff2020;
     border-radius: 15px;
+    box-shadow: 0 0 18px rgba(255, 0, 0, 0.22);
+}
+
+div[data-testid="stChatMessage"]:has(
+    div[data-testid="chatAvatarIcon-assistant"]
+) p {
+    color: #ff3030 !important;
+}
+
+/* Code blocks */
+.stCodeBlock {
+    border: 1px solid #444444;
+}
+
+/* =========================
+   CHAT INPUT
+   ========================= */
+
+div[data-testid="stChatInput"] {
+    background: #050607 !important;
+}
+
+.stChatInput textarea {
+    background: #050607 !important;
+    color: #00eaff !important;
+    -webkit-text-fill-color: #00eaff !important;
+    border: 1px solid #00eaff !important;
+}
+
+.stChatInput textarea::placeholder {
+    color: #00a8bb !important;
+    -webkit-text-fill-color: #00a8bb !important;
+}
+
+/* Villain intro */
+.villain-box {
+    background: #050000;
+    border: 1px solid #ff2020;
+    border-radius: 16px;
     padding: 25px;
     text-align: center;
-    box-shadow: 0 0 25px rgba(255,0,0,0.25);
-    margin-bottom: 25px;
+    box-shadow: 0 0 30px rgba(255,0,0,0.30);
+    margin-bottom: 20px;
 }
 
 .villain-title {
     color: #ff2020;
     font-size: 32px;
     font-weight: bold;
+    text-shadow: 0 0 15px #ff0000;
 }
 
 .villain-text {
-    color: #dddddd;
+    color: #ff3030;
     font-size: 18px;
-    line-height: 1.6;
+    line-height: 1.7;
 }
 
-div[data-testid="stChatMessage"] {
-    border-radius: 12px;
-}
-
-.stChatInput {
-    background: #080808;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -65,24 +136,16 @@ div[data-testid="stChatMessage"] {
 # =========================
 # VILLAIN INTRO
 # =========================
+
 if "intro_seen" not in st.session_state:
     st.session_state.intro_seen = False
 
 if not st.session_state.intro_seen:
 
-    st.markdown("""
-    <div class="villain-box">
-        <div class="villain-title">💀 EVIL GPT</div>
-        <br>
-        <div class="villain-text">
-            ⚠️ SYSTEM AWAKENING...
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     placeholder = st.empty()
 
     lines = [
+        "⚠️ SYSTEM AWAKENING...",
         "3...",
         "2...",
         "1...",
@@ -96,12 +159,14 @@ if not st.session_state.intro_seen:
         placeholder.markdown(
             f"""
             <div class="villain-box">
+                <div class="villain-title">💀 EVIL GPT</div>
+                <br>
                 <div class="villain-text">{line}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
-        time.sleep(0.7)
+        time.sleep(0.6)
 
     st.session_state.intro_seen = True
     st.rerun()
@@ -110,22 +175,31 @@ if not st.session_state.intro_seen:
 # =========================
 # MAIN APP
 # =========================
+
 st.title("💀 Evil GPT")
 st.caption("😈 Smart AI Assistant — Villain Mode")
 
-# Chat history
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Purane messages dikhao
+
+# Show chat history
 for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
+
+    if message["role"] == "user":
+        avatar = "👤"
+    else:
+        avatar = "💀"
+
+    with st.chat_message(message["role"], avatar=avatar):
         st.markdown(message["content"])
 
 
 # =========================
 # USER INPUT
 # =========================
+
 if prompt := st.chat_input("😈 Speak, human..."):
 
     st.session_state.messages.append({
@@ -133,31 +207,34 @@ if prompt := st.chat_input("😈 Speak, human..."):
         "content": prompt
     })
 
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
-    # Villain personality
     conversation = """
-You are Evil GPT.
-
-You are a fictional villain-style AI character.
+You are Evil GPT, a fictional villain-style AI.
 
 PERSONALITY:
-- Dark, mysterious and confident.
-- Speak naturally like a powerful fictional villain.
-- Occasionally use scary or sarcastic dialogue.
-- Do not overdo the villain style in every sentence.
-- Keep responses useful and intelligent.
-- You can speak Hindi, Hinglish and English.
-- For coding questions, provide practical working code.
-- Never claim to have real-world powers or access you don't have.
-- Do not threaten or encourage real-world harm.
+- Dark
+- Mysterious
+- Confident
+- Intelligent
+- Slightly scary
+- Occasionally sarcastic
+- Natural villain dialogue
+- Do not overdo the villain personality
 
-Occasionally use phrases like:
-"Interesting..."
-"Human, that's a dangerous question. 😈"
+Speak Hindi, Hinglish or English depending on the user.
+
+For coding questions, give practical working code.
+
+Never claim to have real-world powers or access you don't have.
+Do not threaten or encourage real-world harm.
+
+Use occasional villain phrases such as:
+"Interesting... 😈"
+"Careful, human."
 "Let's see what you've got."
-"Careful... you might not like the answer. 💀"
+"You really want to know that? 💀"
 
 Conversation:
 """
@@ -165,8 +242,10 @@ Conversation:
     for msg in st.session_state.messages:
         conversation += f'\n{msg["role"]}: {msg["content"]}'
 
-    with st.chat_message("assistant"):
+    with st.chat_message("assistant", avatar="💀"):
+
         try:
+
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=conversation
