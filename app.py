@@ -2,26 +2,24 @@ import google.generativeai as genai
 import streamlit as st
 
 # अपनी Gemini API Key यहाँ डालें
-genai.configure(api_key="YOUR_API_KEY_HERE")
+genai.configure(api_key="AQ.Ab8RN6JptFytm6XuAjwczwXifYS5tdoJQuh6Lzw1CDNbJS67_w")
 
 st.title("Evil GPT")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 if "messages" not in st.session_state:
-  st.session_state.messages = []
+    st.session_state.messages = []
 
 for message in st.session_state.messages:
-  with st.chat_message(message["role"]):
-    st.markdown(message["content"])
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 if prompt := st.chat_input("Ask anything..."):
-  st.session_state.messages.append({"role": "user", "content": prompt})
-  with st.chat_message("user"):
-    st.markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-  response = model.generate_content(prompt)
-  answer = response.text
-
-  with st.chat_message("assistant"):
-    st.markdown(answer)
-  st.session_state.messages.append({"role": "assistant", "content": answer})
+    with st.chat_message("assistant"):
+        response = model.generate_content(prompt)
+        st.markdown(response.text)
+        st.session_state.messages.append({"role": "assistant", "content": response.text})
