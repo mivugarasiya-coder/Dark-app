@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 import html
 from google import genai
 
@@ -25,174 +24,134 @@ st.set_page_config(
 # CSS
 # =========================
 
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
 
-.stApp {
-    background: #020304 !important;
-    color: white !important;
-}
+    .stApp {
+        background: #020304 !important;
+        color: white !important;
+    }
 
-/* Header */
-h1 {
-    color: #ff2020 !important;
-    text-align: center;
-    font-weight: 800 !important;
-    text-shadow:
-        0 0 8px #ff0000,
-        0 0 20px #ff0000;
-    margin-bottom: 0 !important;
-}
+    h1 {
+        color: #ff2020 !important;
+        text-align: center !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 8px #ff0000, 0 0 20px #ff0000;
+        margin-bottom: 0 !important;
+    }
 
-[data-testid="stCaptionContainer"] {
-    color: #ff3030 !important;
-    text-align: center !important;
-}
+    [data-testid="stCaptionContainer"] {
+        color: #ff3030 !important;
+        text-align: center !important;
+    }
 
-/* Remove Streamlit chat boxes */
-div[data-testid="stChatMessage"] {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
+    /* Streamlit default message box remove */
+    div[data-testid="stChatMessage"] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
 
-/* Remove inner containers */
-div[data-testid="stChatMessage"] > div {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
+    div[data-testid="stChatMessage"] > div {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 
-/* =========================
-   VILLAIN INTRO
-   ========================= */
+    /* Hide avatars */
+    div[data-testid="stChatMessageAvatarUser"],
+    div[data-testid="stChatMessageAvatarAssistant"] {
+        display: none !important;
+    }
 
-.villain-box {
-    background: #080000;
-    border: 1px solid #ff2020;
-    border-radius: 15px;
-    padding: 24px;
-    margin: 18px 0 25px 0;
-    box-shadow:
-        0 0 10px rgba(255,0,0,.45),
-        0 0 30px rgba(255,0,0,.15);
-}
+    /* USER */
+    .user-wrap {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        margin: 16px 0;
+    }
 
-.villain-title {
-    color: #ff2020;
-    font-size: 30px;
-    font-weight: 800;
-    text-shadow:
-        0 0 8px #ff0000,
-        0 0 18px #ff0000;
-}
+    .user-content {
+        max-width: 82%;
+        padding: 3px 5px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
 
-.villain-text {
-    color: #ff4545;
-    font-size: 17px;
-    line-height: 1.7;
-}
+    .user-name {
+        color: #00eaff;
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        text-shadow: 0 0 7px #00eaff;
+    }
 
-/* =========================
-   USER MESSAGE
-   ========================= */
+    .user-text {
+        color: #00eaff;
+        font-size: 16px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
 
-.user-wrap {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    margin: 20px 0;
-}
+    /* EVIL GPT */
+    .evil-wrap {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin: 16px 0;
+    }
 
-.user-bubble {
-    max-width: 82%;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 3px 5px;
-}
+    .evil-content {
+        max-width: 88%;
+        padding: 3px 5px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
 
-.user-name {
-    color: #00eaff;
-    font-weight: 700;
-    font-size: 14px;
-    margin-bottom: 5px;
-    text-shadow: 0 0 8px rgba(0,234,255,.5);
-}
+    .evil-name {
+        color: #ff2020;
+        font-size: 14px;
+        font-weight: 800;
+        margin-bottom: 4px;
+        text-shadow: 0 0 7px #ff0000;
+    }
 
-.user-text {
-    color: #00eaff;
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-}
+    .evil-text {
+        color: #ff3030;
+        font-size: 16px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
 
-/* =========================
-   EVIL GPT MESSAGE
-   ========================= */
+    /* INPUT */
+    div[data-testid="stChatInput"] {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 
-.evil-wrap {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    margin: 20px 0;
-}
+    div[data-testid="stChatInput"] textarea {
+        background: #080a0c !important;
+        color: white !important;
+        border: 1px solid #222 !important;
+        border-radius: 14px !important;
+    }
 
-.evil-bubble {
-    max-width: 88%;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 3px 5px;
-}
+    div[data-testid="stChatInput"] textarea:focus {
+        border: 1px solid #ff2020 !important;
+        box-shadow: 0 0 8px rgba(255, 0, 0, 0.25) !important;
+    }
 
-.evil-name {
-    color: #ff2020;
-    font-weight: 800;
-    font-size: 14px;
-    margin-bottom: 5px;
-    text-shadow: 0 0 8px rgba(255,0,0,.7);
-}
-
-.evil-text {
-    color: #ff3030;
-    font-size: 16px;
-    line-height: 1.6;
-    white-space: pre-wrap;
-}
-
-/* =========================
-   INPUT
-   ========================= */
-
-div[data-testid="stChatInput"] {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-div[data-testid="stChatInput"] textarea {
-    background: #080a0c !important;
-    color: white !important;
-    border: 1px solid #222 !important;
-    border-radius: 14px !important;
-}
-
-div[data-testid="stChatInput"] textarea:focus {
-    border: 1px solid #ff2020 !important;
-    box-shadow: 0 0 10px rgba(255,0,0,.25) !important;
-}
-
-/* Hide default Streamlit avatars */
-div[data-testid="stChatMessageAvatarUser"],
-div[data-testid="stChatMessageAvatarAssistant"] {
-    display: none !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # =========================
 # TITLE
@@ -208,8 +167,9 @@ st.caption("Smart AI Assistant")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+
 # =========================
-# MESSAGE FUNCTIONS
+# DISPLAY FUNCTIONS
 # =========================
 
 def show_user_message(text):
@@ -217,4 +177,118 @@ def show_user_message(text):
 
     st.markdown(
         f"""
-        <div class="
+        <div class="user-wrap">
+            <div class="user-content">
+                <div class="user-name">👤 You</div>
+                <div class="user-text">{safe_text}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def show_evil_message(text):
+    safe_text = html.escape(text)
+
+    st.markdown(
+        f"""
+        <div class="evil-wrap">
+            <div class="evil-content">
+                <div class="evil-name">💀 Evil GPT</div>
+                <div class="evil-text">{safe_text}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# =========================
+# OLD CHAT
+# =========================
+
+for message in st.session_state.messages:
+
+    if message["role"] == "user":
+        show_user_message(message["content"])
+    else:
+        show_evil_message(message["content"])
+
+
+# =========================
+# INPUT
+# =========================
+
+prompt = st.chat_input("Ask anything...")
+
+if prompt:
+
+    # Show user immediately
+    st.session_state.messages.append(
+        {
+            "role": "user",
+            "content": prompt
+        }
+    )
+
+    show_user_message(prompt)
+
+    # =========================
+    # LIGHTWEIGHT PROMPT
+    # =========================
+
+    conversation = """
+You are Evil GPT.
+
+You are a dark, intelligent, slightly sarcastic fictional villain-style AI.
+
+Be helpful and answer naturally in Hindi, Hinglish or English.
+
+Keep answers concise unless the user asks for detail.
+
+For coding questions, provide practical working code.
+
+Never claim real-world powers or access you do not have.
+Do not threaten or encourage real-world harm.
+
+Conversation:
+"""
+
+    # Sirf recent 10 messages bhejo
+    recent_messages = st.session_state.messages[-10:]
+
+    for message in recent_messages:
+        conversation += (
+            "\n"
+            + message["role"]
+            + ": "
+            + message["content"]
+        )
+
+    # =========================
+    # GEMINI
+    # =========================
+
+    try:
+
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=conversation
+        )
+
+        answer = response.text
+
+        show_evil_message(answer)
+
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": answer
+            }
+        )
+
+    except Exception as e:
+
+        st.error("⚠️ AI Error")
+        st.exception(e)
