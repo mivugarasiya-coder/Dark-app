@@ -1,8 +1,7 @@
 import google.generativeai as genai
 import streamlit as st
 
-# अपनी Gemini API Key यहाँ डालें
-genai.configure(api_key="AQ.Ab8RN6JptFytm6XuAjwczwXifYS5tdoJQuh6Lzw1CDNbJS67_w")
+genai.configure(api_key="AQ.Ab8RN6Kw9r70bRlfZYniekYVrlw-LyfKRroPgVut8vLvZdiFNw")
 
 st.title("Evil GPT")
 model = genai.GenerativeModel("gemini-1.5-flash")
