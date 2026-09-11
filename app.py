@@ -1,14 +1,16 @@
 import streamlit as st
 import html
-from google import genai
+from openai import OpenAI
+
 
 # =========================
-# GEMINI
+# OPENAI
 # =========================
 
-client = genai.Client(
+client = OpenAI(
     api_key=st.secrets["OPENAI_API_KEY"]
 )
+
 
 # =========================
 # PAGE
@@ -20,8 +22,9 @@ st.set_page_config(
     layout="centered"
 )
 
+
 # =========================
-# CSS
+# DARK UI
 # =========================
 
 st.markdown(
@@ -46,7 +49,8 @@ st.markdown(
         text-align: center !important;
     }
 
-    /* Streamlit default message box remove */
+    /* REMOVE DEFAULT CHAT BOX */
+
     div[data-testid="stChatMessage"] {
         background: transparent !important;
         border: none !important;
@@ -61,13 +65,15 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* Hide avatars */
+    /* HIDE AVATARS */
+
     div[data-testid="stChatMessageAvatarUser"],
     div[data-testid="stChatMessageAvatarAssistant"] {
         display: none !important;
     }
 
     /* USER */
+
     .user-wrap {
         width: 100%;
         display: flex;
@@ -99,6 +105,7 @@ st.markdown(
     }
 
     /* EVIL GPT */
+
     .evil-wrap {
         width: 100%;
         display: flex;
@@ -130,6 +137,7 @@ st.markdown(
     }
 
     /* INPUT */
+
     div[data-testid="stChatInput"] {
         background: transparent !important;
         border: none !important;
@@ -153,12 +161,14 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+
 # =========================
 # TITLE
 # =========================
 
 st.title("💀 EVIL GPT")
 st.caption("Smart AI Assistant")
+
 
 # =========================
 # CHAT HISTORY
@@ -212,6 +222,7 @@ for message in st.session_state.messages:
 
     if message["role"] == "user":
         show_user_message(message["content"])
+
     else:
         show_evil_message(message["content"])
 
@@ -222,9 +233,11 @@ for message in st.session_state.messages:
 
 prompt = st.chat_input("Ask anything...")
 
+
 if prompt:
 
-    # Show user immediately
+    # USER MESSAGE
+
     st.session_state.messages.append(
         {
             "role": "user",
@@ -234,14 +247,16 @@ if prompt:
 
     show_user_message(prompt)
 
+
     # =========================
-    # LIGHTWEIGHT PROMPT
+    # EVIL GPT PERSONALITY
     # =========================
 
-    conversation = """
+    instructions = """
 You are Evil GPT.
 
-You are a dark, intelligent, slightly sarcastic fictional villain-style AI.
+You are a dark, intelligent, slightly sarcastic fictional
+villain-style AI.
 
 Be helpful and answer naturally in Hindi, Hinglish or English.
 
@@ -250,34 +265,49 @@ Keep answers concise unless the user asks for detail.
 For coding questions, provide practical working code.
 
 Never claim real-world powers or access you do not have.
-Do not threaten or encourage real-world harm.
 
-Conversation:
+Do not threaten or encourage real-world harm.
 """
 
-    # Sirf recent 10 messages bhejo
-    recent_messages = st.session_state.messages[-10:]
-
-    for message in recent_messages:
-        conversation += (
-            "\n"
-            + message["role"]
-            + ": "
-            + message["content"]
-        )
 
     # =========================
-    # GEMINI
+    # RECENT CONVERSATION
+    # =========================
+
+    recent_messages = st.session_state.messages[-10:]
+
+    conversation = ""
+
+    for message in recent_messages:
+
+        role = message["role"]
+
+        if role == "user":
+            conversation += (
+                "\nUser: "
+                + message["content"]
+            )
+
+        else:
+            conversation += (
+                "\nEvil GPT: "
+                + message["content"]
+            )
+
+
+    # =========================
+    # OPENAI
     # =========================
 
     try:
 
-        response = client.models.generate_content(
-            model="gemini-3.6-flash",
-            contents=conversation
+        response = client.responses.create(
+            model="gpt-5.5",
+            instructions=instructions,
+            input=conversation
         )
 
-        answer = response.text
+        answer = response.output_text
 
         show_evil_message(answer)
 
@@ -288,7 +318,9 @@ Conversation:
             }
         )
 
+
     except Exception as e:
 
         st.error("⚠️ AI Error")
+
         st.exception(e)
